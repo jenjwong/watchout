@@ -2,13 +2,16 @@
 
 // d3 selector for the svg-g
 var svg = d3.select('body').append('svg')
-  .attr('height', 500)
-  .attr('width', 500)
-.append('g');
-  // .attr('height', 500 - 100)
-  // .attr('width', 500 - 100);
-  // .attr('transform', 'translate(' + 10 + ',' + 10 + ')' );
+    .attr('height', 500)
+    .attr('width', 500)
+  .append('g');
+    // .attr('height', 500 - 100)
+    // .attr('width', 500 - 100);
+    // .attr('transform', 'translate(' + 10 + ',' + 10 + ')' );
 
+//////////
+// Enemies
+//////////
 //makes n enemies with random positions
 var makeEnemies = function(n) {
   var arr = [];
@@ -16,7 +19,8 @@ var makeEnemies = function(n) {
     arr.push({
       id: i,
       x: Math.random() * 400,
-      y: Math.random() * 400
+      y: Math.random() * 400,
+      r: Math.random() * 20 + 5
     });
   }
   return arr;
@@ -30,12 +34,7 @@ var brdEnemies = svg.selectAll('enemies').data(allEnemies)
     .attr('class', 'enemy')
     .attr('cx', function(d) { return d.x; } )
     .attr('cy', function(d) { return d.y; } )
-    .attr('r', 10);
-
-
-setInterval(function() {
-  update(randMovEnemies(allEnemies));
-}, 1000);
+    .attr('r', function(d) { return d.r; });
 
 // function that generates random enemy positons
 var randMovEnemies = function(dataArray) {
@@ -46,24 +45,55 @@ var randMovEnemies = function(dataArray) {
   return dataArray;
 };
 
-
-//d3 update function
+//d3 update function for enemey
 var update = function(dataArray) {
   //update
   brdEnemies.data(dataArray)
-  .transition().duration(1000)
-  .attr('cx', function(d) { return d.x; } )
-  .attr('cy', function(d) { return d.y; } )
-       .transition()
-       .duration(10)
-      .tween('custom', collisionDetection);
+  .transition().duration(5000)
+    .tween('custom', collisionDetection)
+      .attr('cx', function(d) { return d.x; } )
+      .attr('cy', function(d) { return d.y; } );
+      
   //enter
 
   //exit
 };
 
+//implement collision detection
+var checkCollision = function(enemy, callback) {
+  players.forEach(function(player) {
+    var radiusSum = 10 + parseFloat(enemy.attr('r'));
+    var xDiff = parseFloat(enemy.attr('cx')) - player.x;
+    var yDiff = parseFloat(enemy.attr('cy')) - player.y;
 
+    var seperation = Math.sqrt(Math.pow(xDiff, 2) + Math.pow(yDiff, 2));
+    if (seperation < radiusSum) {
+      callback(player, enemy);
+    }
+  });
+};
 
+var collisionDetection = function() {
+  var enemy = d3.select(this);
+  //var eX = get enemy x
+  //var eY = get enemy y
+
+  return function(t) {
+    checkCollision(d3.select(this), function() {
+      console.log('collision!!!!!!');
+    });  
+  };
+  
+
+};
+
+setInterval(function() {
+  update(randMovEnemies(allEnemies));
+}, 5000);
+
+//////////
+// Player
+//////////
 var Player = function(x, y) {
   var player = {};
   player.id = 'player';
@@ -95,26 +125,3 @@ var dragBehavior = d3.behavior.drag()
     .on('drag', onDrag);
 
 player.call(dragBehavior);
-
-//implement collision detection
-var checkCollision = function(enemy, callback) {
-  players.forEach(function(player) {
-    var radiusSum = 10 + parseFloat(enemy.attr('r'));
-    var xDiff = parseFloat(enemy.attr('cx')) - player.x;
-    var yDiff = parseFloat(enemy.attr('cy')) - player.y;
-
-    var seperation = Math.sqrt(Math.pow(xDiff, 2) + Math.pow(yDiff, 2));
-    if (seperation < radiusSum) {
-      callback(player, enemy);
-    }
-  });
-};
-
-var collisionDetection = function() {
-  var enemy = d3.select(this);
-  checkCollision(enemy, function() {
-    console.log('collision!!!!!!');
-  });
-
-};
-
