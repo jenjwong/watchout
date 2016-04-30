@@ -9,6 +9,30 @@ var svg = d3.select('body').append('svg')
     // .attr('width', 500 - 100);
     // .attr('transform', 'translate(' + 10 + ',' + 10 + ')' );
 
+/////////////
+// ScoreBoard
+/////////////
+var currScore = parseInt(d3.select('.current > span').text(), 10);
+var highScore = parseInt(d3.select('.highscore > span').text(), 10);
+
+var updateScore = function() {
+  d3.select('.current > span').text(currScore);
+  currScore++;
+};
+
+var updateHighScore = function() {
+  if ( currScore > highScore) {
+    highScore = currScore;
+    d3.select('.highscore > span').text(highScore);
+  }
+};
+
+var resetScore = function() {
+  currScore = 0;
+};
+
+setInterval( () => updateScore(), 10);
+
 //////////
 // Enemies
 //////////
@@ -26,7 +50,7 @@ var makeEnemies = function(n) {
   return arr;
 };
 
-allEnemies = makeEnemies(10);
+allEnemies = makeEnemies(50);
 
 // d3 selector for the circle enemies 
 var brdEnemies = svg.selectAll('enemies').data(allEnemies)
@@ -49,7 +73,7 @@ var randMovEnemies = function(dataArray) {
 var update = function(dataArray) {
   //update
   brdEnemies.data(dataArray)
-  .transition().duration(5000)
+  .transition().duration(1000)
     .tween('custom', collisionDetection)
       .attr('cx', function(d) { return d.x; } )
       .attr('cy', function(d) { return d.y; } );
@@ -75,21 +99,24 @@ var checkCollision = function(enemy, callback) {
 
 var collisionDetection = function() {
   var enemy = d3.select(this);
+  // console.log(this, 'outer');
   //var eX = get enemy x
   //var eY = get enemy y
 
   return function(t) {
     checkCollision(d3.select(this), function() {
+      // console.log(this, 'inner');
       console.log('collision!!!!!!');
+      updateHighScore();
+      resetScore();
     });  
   };
-  
-
 };
 
 setInterval(function() {
   update(randMovEnemies(allEnemies));
-}, 5000);
+}, 1000);
+
 
 //////////
 // Player
