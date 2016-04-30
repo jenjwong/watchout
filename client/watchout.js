@@ -32,6 +32,11 @@ var brdEnemies = svg.selectAll('enemies').data(allEnemies)
     .attr('cy', function(d) { return d.y; } )
     .attr('r', 10);
 
+
+setInterval(function() {
+  update(randMovEnemies(allEnemies));
+}, 1000);
+
 // function that generates random enemy positons
 var randMovEnemies = function(dataArray) {
   for (var i = 0; i < dataArray.length; i++) {
@@ -48,16 +53,15 @@ var update = function(dataArray) {
   brdEnemies.data(dataArray)
   .transition().duration(1000)
   .attr('cx', function(d) { return d.x; } )
-  .attr('cy', function(d) { return d.y; } );
+  .attr('cy', function(d) { return d.y; } )
+       .transition()
+       .duration(10)
+      .tween('custom', collisionDetection);
   //enter
 
   //exit
 };
 
-
-setInterval(function() {
-  update(randMovEnemies(allEnemies));
-}, 1000);
 
 
 var Player = function(x, y) {
@@ -75,6 +79,7 @@ var player = svg.selectAll('player').data(players)
   .enter().append('svg:rect')
     .attr('width', 10)
     .attr('height', 10)
+    .attr('fill', 'blue')
     .attr('x', function(d) { return d.x; } )
     .attr('y', function(d) { return d.y; } );
 
@@ -90,4 +95,26 @@ var dragBehavior = d3.behavior.drag()
     .on('drag', onDrag);
 
 player.call(dragBehavior);
+
+//implement collision detection
+var checkCollision = function(enemy, callback) {
+  players.forEach(function(player) {
+    var radiusSum = 10 + parseFloat(enemy.attr('r'));
+    var xDiff = parseFloat(enemy.attr('cx')) - player.x;
+    var yDiff = parseFloat(enemy.attr('cy')) - player.y;
+
+    var seperation = Math.sqrt(Math.pow(xDiff, 2) + Math.pow(yDiff, 2));
+    if (seperation < radiusSum) {
+      callback(player, enemy);
+    }
+  });
+};
+
+var collisionDetection = function() {
+  var enemy = d3.select(this);
+  checkCollision(enemy, function() {
+    console.log('collision!!!!!!');
+  });
+
+};
 
