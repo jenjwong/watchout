@@ -44,21 +44,28 @@ var makeEnemies = function(n) {
       id: i,
       x: Math.random() * 400,
       y: Math.random() * 400,
-      r: Math.random() * 20 + 5
+      width: Math.random() * 50 + 5
+      // r: Math.sqrt( Math.pow(this.width, 2) / 2)
     });
+
+    var end = arr.length - 1;
+    arr[end].r = Math.sqrt( Math.pow( arr[end].width, 2) / 2);
   }
   return arr;
 };
 
-allEnemies = makeEnemies(50);
+allEnemies = makeEnemies(10);
 
 // d3 selector for the circle enemies 
 var brdEnemies = svg.selectAll('enemies').data(allEnemies)
-  .enter().append('svg:circle')
+  .enter().append('image')
+    .attr('xlink:href', 'shuriken.png')
     .attr('class', 'enemy')
-    .attr('cx', function(d) { return d.x; } )
-    .attr('cy', function(d) { return d.y; } )
-    .attr('r', function(d) { return d.r; });
+    .attr('x', function(d) { return d.x; } )
+    .attr('y', function(d) { return d.y; } )
+    .attr('r', function(d) { return d.r; } )
+    .attr('height', function(d) { return d.width; } )
+    .attr('width', function(d) { return d.width; } );
 
 // function that generates random enemy positons
 var randMovEnemies = function(dataArray) {
@@ -75,8 +82,8 @@ var update = function(dataArray) {
   brdEnemies.data(dataArray)
   .transition().duration(1000)
     .tween('custom', collisionDetection)
-      .attr('cx', function(d) { return d.x; } )
-      .attr('cy', function(d) { return d.y; } );
+      .attr('x', function(d) { return d.x; } )
+      .attr('y', function(d) { return d.y; } );
       
   //enter
 
@@ -87,8 +94,8 @@ var update = function(dataArray) {
 var checkCollision = function(enemy, callback) {
   players.forEach(function(player) {
     var radiusSum = 10 + parseFloat(enemy.attr('r'));
-    var xDiff = parseFloat(enemy.attr('cx')) - player.x;
-    var yDiff = parseFloat(enemy.attr('cy')) - player.y;
+    var xDiff = parseFloat(enemy.attr('x')) - player.x;
+    var yDiff = parseFloat(enemy.attr('y')) - player.y;
 
     var seperation = Math.sqrt(Math.pow(xDiff, 2) + Math.pow(yDiff, 2));
     if (seperation < radiusSum) {
@@ -100,9 +107,6 @@ var checkCollision = function(enemy, callback) {
 var collisionDetection = function() {
   var enemy = d3.select(this);
   // console.log(this, 'outer');
-  //var eX = get enemy x
-  //var eY = get enemy y
-
   return function(t) {
     checkCollision(d3.select(this), function() {
       // console.log(this, 'inner');
