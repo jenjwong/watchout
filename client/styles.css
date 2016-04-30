@@ -3,7 +3,12 @@
 /* Note: an asteroid image is included in this repo.
 Feel free to use it if you like. */
 
-image {
+svg {
+  background-image: url("http://www.kingarthurflour.com/blog/files/2015/04/Toast21-900x675.jpg");
+}
+
+image.enemy {
+  transform-origin: 50% 50%;
   animation:spin 500ms linear infinite;
 }
 

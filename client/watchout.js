@@ -12,12 +12,19 @@ var svg = d3.select('body').append('svg')
 /////////////
 // ScoreBoard
 /////////////
+var collisions = parseInt(d3.select('.coll > span').text(), 10);
 var currScore = parseInt(d3.select('.current > span').text(), 10);
 var highScore = parseInt(d3.select('.highscore > span').text(), 10);
 
 var updateScore = function() {
   d3.select('.current > span').text(currScore);
   currScore++;
+};
+
+var updateCollisionCount = function() {
+  d3.select('.coll > span').text(collisions);
+  collisions++;
+  console.log(collisions);
 };
 
 var updateHighScore = function() {
@@ -110,7 +117,7 @@ var collisionDetection = function() {
   return function(t) {
     checkCollision(d3.select(this), function() {
       // console.log(this, 'inner');
-      console.log('collision!!!!!!');
+      updateCollisionCount();
       updateHighScore();
       resetScore();
     });  
